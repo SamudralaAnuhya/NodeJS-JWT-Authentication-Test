@@ -8,20 +8,22 @@ const jwt = require("jsonwebtoken");
 // const express = require("express");
 const { expressjwt: exjwt } = require("express-jwt");
 
+
+app.use((req, res, next) => {
+    res.setHeader("Access-Control-Allow-Origin", "http://localhost:3000");
+    res.setHeader("Access-Control-Allow-Methods", "Content-type, Authorization");
+    next();
+  });
+
 const secretKey = process.env.SECRET_KEY || "do not hardcode, only for test";
 
 const jwtmw = exjwt({ secret: secretKey, algorithms: ["HS256"] });
 
 let users = [
-  { id: 1, username: "admin", password: "admin" },
+  { id: 1, username: "anuhya", password: "mypass" },
   { id: 2, username: "itsme", password: "mypass" },
 ];
 
-app.use((req, res, next) => {
-  res.setHeader("Access-Control-Allow-Origin", "http://localhost:3000");
-  res.setHeader("Access-Control-Allow-Methods", "Content-type, Authorization");
-  next();
-});
 app.use(bodyParser.json()); // support json encoded bodies
 app.use(bodyParser.urlencoded({ extended: true })); // support encoded bodies
 
@@ -83,10 +85,10 @@ app.get("/api/dashboard", jwtmw, (req, res) => {
 });
 
 app.get("/api/settings", jwtmw, (req, res) => {
-  res.json({
-    success: true,
-    myContent: "Please use this page to update settings",
-  });
+                res.json({
+                success: true,
+                myContent: "Please use this page to update settings",
+    });
 });
 
 // function verifyToken(req, res, next) {

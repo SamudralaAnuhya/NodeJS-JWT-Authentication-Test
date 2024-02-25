@@ -26,21 +26,22 @@
                 <label for="password">password</label>
                 <input type="password" id="password" name="password"><br><br>
             </div>
-
+            </br>
+            </br>
 
             <div style="display: flex;">
                 <button onclick="login()">Login</button>
                 <button id='dashboard' onclick="getDashboard()">View Dashboard</button>
                 <button id='settings' onclick="changeSettings()">Change Settings</button>
             </div>
-            </br>
-            </br>
+
+
         </main>
 
 
-
-        <div class="info">
-            <p><strong>Note: </strong>Please provide your credentials above</p>
+        <div>
+            </br>
+            <p id="button"></p>
         </div>
 
     </div>
@@ -77,7 +78,8 @@
                     document.querySelector('h1.login').innerHTML = 'Welcome to your personalized Dashboard';
                     document.querySelector('main').innerHTML = res.data.myContent;
                     document.getElementById('title').innerText = "Dashboard";
-                    document.getElementById("settings").style.display = "block"
+                    var button = "<button type='button' onclick='logout()'>Logout</button><button type='button' onclick='changeSettings()'>Settings</button>";
+                    document.getElementById('button').innerHTML = button;
                     history.pushState({}, '', '/dashboard');
                 }
             }).catch(err => {
@@ -111,6 +113,11 @@
                     }, 1000);
                 }
             });
+        }
+
+        function logout() {
+            localStorage.removeItem('token');
+            window.location.href = '/';
         }
 
         function onLoad() {
