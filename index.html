@@ -1,118 +1,128 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title id="title">Document</title>
-
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
-        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.7/axios.min.js"
-        integrity="sha512-NQfB/bDaB8kaSXF8E77JjhHG5PM6XVRxvHzkZiwl3ddWCEPBa23T76MuWSwAJdMGJnmQqM0VeY9kFszsrBEFrQ=="
-        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login</title>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+<link rel="stylesheet" type="text/css" src="/public/styles.css" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.20.0/axios.min.js"
+    integrity="sha512-quHCp3WbBNkwLfYUMd+KwBAgpVukJu5MncuQaWXgCrfgcxCJAq/fo+oqrRKOj+UKEmyMCG3tb8RB63W+EmrOBg=="
+    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 </head>
 
-<body>
-    <div class="container-fluid">
-        <h1 class="login">Login</h1>
-        <main>
-            <div class="row">
-                <label for="username">Username</label>
-                <input type="text" id="username" name="username"><br><br>
+<body class="text-center">
+    <div class="login-container">
+        <div class="login-box">
+            <h2 class="text-center">Login</h2>
+            <br id="loginForm">
+            <div class="form-group-holder">
+                <div class="form-group row">
+                    <label for="username" class="col-sm-2 col-form-label">Username</label>
 
-            </div>
-            <div class="row">
-                <label for="password">password</label>
-                <input type="password" id="password" name="password"><br><br>
+                    <div class="col-sm-5">
+                        <input type="text" class="form-control" id="username" name="username" placeholder="Username"
+                            required>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label for="password" class="col-sm-2 col-form-label">Password</label>
+
+                    <div class="col-sm-5">
+                        <input type="password" class="form-control" id="password" name="password" placeholder="Password"
+                            required>
+                    </div>
+
+                </div>
+                <button id="login" onclick="login()" type="button" class="btn btn-primary"
+                    style="width: auto; text-align: center;">Login</button>
             </div>
             </br>
             </br>
+            <div class="btn-group btn-group-toggle">
+                <button id="dashboard" onclick="navigate('dashboard')"
+                    class="btn btn-outline-primary">Dashboard</button>
+                <button id="settings" onclick="navigate('settings')" type="button"
+                    class="btn btn-outline-primary">Settings</button>
 
-            <div style="display: flex;">
-                <button onclick="login()">Login</button>
-                <button id='dashboard' onclick="getDashboard()">View Dashboard</button>
-                <button id='settings' onclick="changeSettings()">Change Settings</button>
             </div>
 
-
-        </main>
-
-
-        <div>
-            </br>
-            <p id="button"></p>
+        </div>
+        <div class="logoutLblPos btn-group btn-group-toggle">
+            <button class="btn btn-outline-warning" style="display: none;" id="logout" type='button'
+                onclick='logout()'>Logout</button>
         </div>
 
+        <div class="info" id="infoText">
+            <p><strong>Note:</strong> Dashboard and Settings are available only for authorized users.</p>
+        </div>
+        <div class="text-center mt-3" id="forgotPassword">
+            <a href="#" class="text-decoration-none">Forgot password?</a>
+        </div>
+        <div class="text-center mt-3" id="signUp">
+            <p>Don't have an account? <a href="#" class="text-decoration-none">Sign up</a></p>
+        </div>
     </div>
 
+    </div>
     <script>
-        var token = "";
+
         function login() {
             const data = {
                 username: document.getElementById('username').value,
                 password: document.getElementById('password').value,
             };
-            axios.post('/api/login', data).then
-                (res => {
-                    console.log(res);
+
+            axios.post('/api/login', data)
+                .then(res => {
                     document.getElementById('username').value = '';
                     document.getElementById('password').value = '';
+                    document.getElementById('logout').style.display = 'none';
+
                     if (res && res.data && res.data.success) {
-                        localStorage.setItem('token', res.data.token);
-                        // token = res.data.token;
+                        const token = res.data.token;
+                        localStorage.setItem('token', token);
                         getDashboard();
+                        window.history.pushState(null, '', '/dashboard');
+                    } else {
+                        window.history.pushState(null, '', '/login');
                     }
                 });
         }
 
         function getDashboard() {
             const token = localStorage.getItem('token');
-            axios.get('/api/dashboard', {
-                headers: {
-                    'Authorization': `Bearer ${token}`
 
-                }
-            }).then(res => {
-                if (res && res.data && res.data.success) {
-                    document.querySelector('h1.login').innerHTML = 'Welcome to your personalized Dashboard';
-                    document.querySelector('main').innerHTML = res.data.myContent;
-                    document.getElementById('title').innerText = "Dashboard";
-                    var button = "<button type='button' onclick='logout()'>Logout</button><button type='button' onclick='changeSettings()'>Settings</button>";
-                    document.getElementById('button').innerHTML = button;
-                    history.pushState({}, '', '/dashboard');
-                }
-            }).catch(err => {
-                if (err.response && err.response.status == 401) {
-                    setTimeout(() => {
-                        localStorage.removeItem('token');
-                        window.location.href = '/';
-                    }, 1000);
-
-                }
-            });
+            axios.get('/api/dashboard', { headers: { 'Authorization': `Bearer ${token}` } })
+                .then(res => {
+                    if (res && res.data && res.data.success) {
+                        document.querySelector('h2.text-center').innerHTML = 'Dashboard';
+                        document.querySelector('.form-group-holder').innerHTML = res.data.myContent;
+                        document.getElementById('forgotPassword').style.display = 'none';
+                        document.getElementById('signUp').style.display = 'none';
+                        document.getElementById('logout').style.display = 'block';
+                        document.getElementById('infoText').style.display = 'none';
+                    }
+                })
+                .catch(err => {
+                    console.error('Error fetching dashboard data:', err);
+                });
         }
 
-        function changeSettings() {
+        function getSettings() {
             const token = localStorage.getItem('token');
-            axios.get('/api/settings', {
-                'Authorization': `Bearer ${token}`
-            }).then(res => {
-                if (res && res.data && res.data.success) {
-                    document.querySelector('h1.login').innerHTML = 'Your Settings';
-                    document.querySelector('main').innerHTML = res.data.myContent;
-                    document.getElementById('title').innerText = "Settings";
-                    history.pushState({}, '', '/settings');
-                }
 
-            }).catch(err => {
-                if (err.response && err.response.status == 401) {
-                    setTimeout(() => {
-                        localStorage.removeItem('token');
-                        window.location.href = '/';
-                    }, 1000);
-                }
-            });
+            axios.get('/api/settings', { headers: { 'Authorization': `Bearer ${token}` } })
+                .then(res => {
+                    if (res && res.data && res.data.success) {
+                        document.querySelector('h2.text-center').innerHTML = 'Settings';
+                        document.querySelector('.form-group-holder').innerHTML = res.data.myContent;
+                        document.getElementById('forgotPassword').style.display = 'none';
+                        document.getElementById('signUp').style.display = 'none';
+                    }
+                })
+                .catch(err => {
+                    console.error('Error fetching settings data:', err);
+                });
         }
 
         function logout() {
@@ -124,12 +134,44 @@
             const token = localStorage.getItem('token');
             if (token) {
                 getDashboard();
+                checkForTokenExpiration();
             }
         }
         onLoad();
+
+        function navigate(route) {
+            if (route === 'dashboard') {
+                getDashboard();
+                window.history.pushState(null, '', '/dashboard');
+            } else if (route === 'settings') {
+                getSettings();
+                window.history.pushState(null, '', '/settings');
+            }
+        }
+
+
+        function isTokenExpired(token) {
+            if (!token) return true;
+            const tokenData = JSON.parse(atob(token.split('.')[1]));
+            const tokenExp = tokenData.exp * 1000;
+            const currentTime = Date.now();
+            return currentTime > tokenExp;
+        }
+
+
+        function checkForTokenExpiration() {
+            const token = localStorage.getItem('token');
+            if (isTokenExpired(token)) {
+                localStorage.removeItem('token');
+                window.location.href = '/';
+                window.location.reload();
+            }
+        }
+
+        // call to check if token expiration for every 1 min
+        setInterval(checkForTokenExpiration, 60000);
+
     </script>
-
-
 </body>
 
 </html>
