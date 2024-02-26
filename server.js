@@ -30,7 +30,7 @@ app.listen(port, () => {
 });
 
 app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname + "/index.html"));
+  res.sendFile(path.join(__dirname + "/public/index.html"));
 });
 
 app.post("/api/login", (req, res) => {
@@ -78,13 +78,13 @@ app.use((err, req, res, next) => {
 app.get("/api/dashboard", jwtmw, (req, res) => {
   res.json({
     success: true,
-    myContent: " this is your private content, it is not visible to others",
+    myContent: "This is your private content, it is not visible to others",
   });
 });
 
 app.get("/api/settings", jwtmw, (req, res) => {
   res.json({
     success: true,
-    myContent: "Please use this page to update settings",
+    myContent: "Please use this page to update settings, it is not visible to others",
   });
 });
